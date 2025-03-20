@@ -1,33 +1,45 @@
 class InnovationData {
-  final String userId;
-  final String innovationField;
-  final List<String> interests;
-  final bool profileComplete;
+  final List<String> businessModel;
+  final List<String> productInnovation;
+  final List<String> processInnovation;
+  final List<String> customerExperience;
+  final List<String> technologyAdoption;
 
   InnovationData({
-    required this.userId,
-    required this.innovationField,
-    required this.interests,
-    this.profileComplete = false,
+    required this.businessModel,
+    required this.productInnovation,
+    required this.processInnovation,
+    required this.customerExperience,
+    required this.technologyAdoption,
   });
 
-  // Convert innovation data to JSON
-  Map<String, dynamic> toJson() {
-    return {
-      'userId': userId,
-      'innovationField': innovationField,
-      'interests': interests,
-      'profileComplete': profileComplete,
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'businessModel': businessModel,
+        'productInnovation': productInnovation,
+        'processInnovation': processInnovation,
+        'customerExperience': customerExperience,
+        'technologyAdoption': technologyAdoption,
+      };
 
-  // Create innovation data from JSON
   factory InnovationData.fromJson(Map<String, dynamic> json) {
     return InnovationData(
-      userId: json['userId'],
-      innovationField: json['innovationField'],
-      interests: List<String>.from(json['interests']),
-      profileComplete: json['profileComplete'] ?? false,
+      businessModel: List<String>.from(json['businessModel']),
+      productInnovation: List<String>.from(json['productInnovation']),
+      processInnovation: List<String>.from(json['processInnovation']),
+      customerExperience: List<String>.from(json['customerExperience']),
+      technologyAdoption: List<String>.from(json['technologyAdoption']),
     );
   }
+
+  factory InnovationData.empty() {
+    return InnovationData(
+      businessModel: [],
+      productInnovation: [],
+      processInnovation: [],
+      customerExperience: [],
+      technologyAdoption: [],
+    );
+  }
+
+
 }

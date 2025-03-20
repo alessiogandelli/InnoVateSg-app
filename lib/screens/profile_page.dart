@@ -1,16 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:innovate/services/storage_service.dart';
+import 'package:innovate/models/onboarding_data.dart';
+import 'package:innovate/models/innovation_data.dart';
+import 'package:innovate/screens/innovation/innovation_assessment_page.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  OnboardingData? onboardingData;
+  InnovationData? innovationData;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final StorageService storageService = StorageService();
+    final onboardingResult = await storageService.getOnboardingData();
+    final innovationResult = await storageService.getInnovationData();
+    
+    setState(() {
+      onboardingData = onboardingResult;
+      innovationData = innovationResult;
+      isLoading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Current innovation level (matching level 3 that's active in the roadmap)
-    const int currentLevel = 3;
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    // Get current innovation level from data or default to 1
+    final int currentLevel = 0;
     const int maxLevel = 5;
     final double progressValue = currentLevel / maxLevel;
-   // final StorageService storageService = StorageService().getOnboardingData();
     
     return SingleChildScrollView(
       child: Center(
@@ -68,20 +101,26 @@ class ProfilePage extends StatelessWidget {
             
             const SizedBox(height: 8),
             // Level text indicator
-            const Text(
-              'Practicing Innovator',
-              style: TextStyle(
+            Text(
+              _getLevelTitle(currentLevel),
+              style: const TextStyle(
                 color: Colors.deepPurple,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 16),
             Text(
-              'User Profile',
+              onboardingData?.name ?? 'User Profile',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 16),
-            ElevatedButton(onPressed: StorageService().deleteOnboardingData, child: Text('reset onbaording')),
+            ElevatedButton(onPressed: () async {
+              await StorageService().deleteOnboardingData();
+              setState(() {
+                onboardingData = null;
+              });
+            }, child: const Text('Reset Onboarding')),
+            
             // Company information
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -98,18 +137,20 @@ class ProfilePage extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Row(
-                        children: const [
-                          Icon(Icons.business, color: Colors.deepPurple),
-                          SizedBox(width: 8),
-                          Text('TechInnovate Solutions', style: TextStyle(fontSize: 16)),
+                        children: [
+                          const Icon(Icons.business, color: Colors.deepPurple),
+                          const SizedBox(width: 8),
+                          Text(onboardingData?.companyName ?? 'Not specified', 
+                              style: const TextStyle(fontSize: 16)),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Row(
-                        children: const [
-                          Icon(Icons.category, color: Colors.deepPurple),
-                          SizedBox(width: 8),
-                          Text('Industry: Software & Technology', style: TextStyle(fontSize: 16)),
+                        children: [
+                          const Icon(Icons.category, color: Colors.deepPurple),
+                          const SizedBox(width: 8),
+                          Text('Industry: ${onboardingData?.industries ?? 'Not specified'}', 
+                              style: const TextStyle(fontSize: 16)),
                         ],
                       ),
                     ],
@@ -118,7 +159,8 @@ class ProfilePage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            // Innovation roadmap
+            
+            // Innovation roadmap or Complete Profile button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
@@ -129,50 +171,26 @@ class ProfilePage extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
-                  _buildRoadmapLevel(
-                    context,
-                    level: 1,
-                    title: 'Novice Innovator',
-                    description: 'Starting to explore innovation concepts',
-                    isCompleted: true,
-                    isActive: false,
-                  ),
-                  _buildLevelConnector(true),
-                  _buildRoadmapLevel(
-                    context,
-                    level: 2,
-                    title: 'Emerging Innovator',
-                    description: 'Applying innovation tools to basic problems',
-                    isCompleted: true,
-                    isActive: false,
-                  ),
-                  _buildLevelConnector(true),
-                  _buildRoadmapLevel(
-                    context,
-                    level: 3,
-                    title: 'Practicing Innovator',
-                    description: 'Implementing innovation methodologies',
-                    isCompleted: false,
-                    isActive: true,
-                  ),
-                  _buildLevelConnector(false),
-                  _buildRoadmapLevel(
-                    context,
-                    level: 4,
-                    title: 'Advanced Innovator',
-                    description: 'Creating disruptive innovation strategies',
-                    isCompleted: false,
-                    isActive: false,
-                  ),
-                  _buildLevelConnector(false),
-                  _buildRoadmapLevel(
-                    context,
-                    level: 5,
-                    title: 'Master Innovator',
-                    description: 'Leading transformative innovation initiatives',
-                    isCompleted: false,
-                    isActive: false,
-                  ),
+                  
+                  if (innovationData?.businessModel.isEmpty ?? true)
+                    _buildCompleteProfileButton(context)
+                  else 
+                    Card(
+                      elevation: 2,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Center(
+                          child: Text(
+                            'Profile Complete',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.deepPurple,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -194,82 +212,54 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildRoadmapLevel(
-    BuildContext context, {
-    required int level,
-    required String title,
-    required String description,
-    required bool isCompleted,
-    required bool isActive,
-  }) {
+
+  Widget _buildCompleteProfileButton(BuildContext context) {
     return Card(
-      elevation: isActive ? 4 : 1,
-      color: isActive ? Colors.deepPurple.shade50 : null,
-      child: InkWell(
-        onTap: () {
-          // Handle level selection here
-        },
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: isCompleted ? Colors.deepPurple : Colors.grey.shade300,
-                ),
-                child: Center(
-                  child: isCompleted
-                      ? const Icon(Icons.check, color: Colors.white)
-                      : Text(
-                          level.toString(),
-                          style: TextStyle(
-                            color: isActive ? Colors.deepPurple : Colors.grey.shade700,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
-                        fontSize: 16,
-                      ),
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Complete your innovation profile to track your progress',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => InnovationAssessmentPage(
+                      currentData: innovationData,
                     ),
-                    Text(
-                      description,
-                      style: TextStyle(
-                        color: Colors.grey.shade700,
-                        fontSize: 14,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ).then((_) => _loadUserData()); // Reload data when returning
+              },
+              icon: const Icon(Icons.add_circle_outline),
+              label: const Text('Complete Your Profile'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.deepPurple,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12),
               ),
-              if (isCompleted)
-                const Icon(Icons.star, color: Colors.amber)
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
-
-  Widget _buildLevelConnector(bool isCompleted) {
-    return Container(
-      height: 30,
-      width: 2,
-      margin: const EdgeInsets.only(left: 20),
-      color: isCompleted ? Colors.deepPurple : Colors.grey.shade300,
-    );
+  
+  String _getLevelTitle(int level) {
+    switch (level) {
+      case 1: return 'Novice Innovator';
+      case 2: return 'Emerging Innovator';
+      case 3: return 'Practicing Innovator';
+      case 4: return 'Advanced Innovator';
+      case 5: return 'Master Innovator';
+      default: return 'Innovator';
+    }
   }
 }

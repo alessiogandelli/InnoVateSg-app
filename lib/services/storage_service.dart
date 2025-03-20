@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:innovate/models/onboarding_data.dart';
+import 'package:innovate/models/innovation_data.dart';
 
 class StorageService {
   static const String _fileName = 'user_data.json';
+  static const String _innovationFileName = 'innovation_data.json';
 
   // Save onboarding data to a JSON file
   Future<void> saveOnboardingData(OnboardingData data) async {
@@ -52,6 +54,47 @@ class StorageService {
       await file.delete();
     } catch (e) {
       print('Error deleting onboarding data: $e');
+    }
+  }
+
+  // Save innovation data to a JSON file
+  Future<void> saveInnovationData(InnovationData data) async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/$_innovationFileName');
+      await file.writeAsString(jsonEncode(data.toJson()));
+    } catch (e) {
+      print('Error saving innovation data: $e');
+    }
+  }
+
+  // Get innovation data from the JSON file
+  Future<InnovationData> getInnovationData() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/$_innovationFileName');
+      
+      if (await file.exists()) {
+        final data = await file.readAsString();
+        return InnovationData.fromJson(jsonDecode(data));
+      }
+      return InnovationData.empty();
+    } catch (e) {
+      print('Error reading innovation data: $e');
+      return InnovationData.empty();
+    }
+  }
+
+  // Delete innovation data
+  Future<void> deleteInnovationData() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/$_innovationFileName');
+      if (await file.exists()) {
+        await file.delete();
+      }
+    } catch (e) {
+      print('Error deleting innovation data: $e');
     }
   }
 }
