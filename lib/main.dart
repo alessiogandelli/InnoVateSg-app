@@ -13,12 +13,27 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Innovation Coach',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF2E8B57), // Sea Green
+          primary: const Color(0xFF2E8B57),
+          secondary: const Color(0xFF66BB6A),
+          tertiary: const Color(0xFFA5D6A7),
+          background: Colors.white,
+        ),
         useMaterial3: true,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF2E8B57),
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        textTheme: const TextTheme(
+          titleLarge: TextStyle(fontWeight: FontWeight.bold),
+          bodyLarge: TextStyle(color: Color(0xFF2E8B57)),
+        ),
       ),
-      home: const HomePage(title: 'Generative AI Chat'),
+      home: const HomePage(title: 'Innovation Coach'),
     );
   }
 }
