@@ -1,9 +1,9 @@
 class InnovationData {
-  final List<String> businessModel;
-  final List<String> productInnovation;
-  final List<String> processInnovation;
-  final List<String> customerExperience;
-  final List<String> technologyAdoption;
+  final List<Map<String, String>> businessModel;
+  final List<Map<String, String>> productInnovation;
+  final List<Map<String, String>> processInnovation;
+  final List<Map<String, String>> customerExperience;
+  final List<Map<String, String>> technologyAdoption;
 
   InnovationData({
     required this.businessModel,
@@ -23,11 +23,16 @@ class InnovationData {
 
   factory InnovationData.fromJson(Map<String, dynamic> json) {
     return InnovationData(
-      businessModel: List<String>.from(json['businessModel']),
-      productInnovation: List<String>.from(json['productInnovation']),
-      processInnovation: List<String>.from(json['processInnovation']),
-      customerExperience: List<String>.from(json['customerExperience']),
-      technologyAdoption: List<String>.from(json['technologyAdoption']),
+      businessModel: List<Map<String, String>>.from(
+          json['businessModel'].map((item) => Map<String, String>.from(item))),
+      productInnovation: List<Map<String, String>>.from(
+          json['productInnovation'].map((item) => Map<String, String>.from(item))),
+      processInnovation: List<Map<String, String>>.from(
+          json['processInnovation'].map((item) => Map<String, String>.from(item))),
+      customerExperience: List<Map<String, String>>.from(
+          json['customerExperience'].map((item) => Map<String, String>.from(item))),
+      technologyAdoption: List<Map<String, String>>.from(
+          json['technologyAdoption'].map((item) => Map<String, String>.from(item))),
     );
   }
 
@@ -41,5 +46,8 @@ class InnovationData {
     );
   }
 
-
+  @override
+  String toString() {
+    return 'InnovationData{businessModel: $businessModel, productInnovation: $productInnovation, processInnovation: $processInnovation, customerExperience: $customerExperience, technologyAdoption: $technologyAdoption}';
+  }
 }

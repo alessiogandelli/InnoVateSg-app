@@ -89,6 +89,9 @@ class StregattoProvider extends LlmProvider with ChangeNotifier {
   
   @override
   Iterable<ChatMessage> get history => _history;
+
+
+
   
   @override
   set history(Iterable<ChatMessage> history) {

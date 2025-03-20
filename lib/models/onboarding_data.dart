@@ -57,4 +57,9 @@ class OnboardingData {
       innovationAttitudes: [],
     );
   }
+
+  @override
+  String toString() {
+    return 'OnboardingData{name: $name, role: $role, interests: $interests, innovationLevel: $innovationLevel, onboardingComplete: $onboardingComplete, companyName: $companyName, industries: $industries, innovationAttitudes: $innovationAttitudes}';
+  }
 }

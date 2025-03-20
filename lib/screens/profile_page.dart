@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:innovate/screens/innovation/category_assessment_page.dart';
 import 'package:innovate/services/storage_service.dart';
 import 'package:innovate/models/onboarding_data.dart';
 import 'package:innovate/models/innovation_data.dart';
@@ -116,8 +117,10 @@ class _ProfilePageState extends State<ProfilePage> {
             const SizedBox(height: 16),
             ElevatedButton(onPressed: () async {
               await StorageService().deleteOnboardingData();
+              await StorageService().deleteInnovationData();
               setState(() {
                 onboardingData = null;
+                innovationData = null;
               });
             }, child: const Text('Reset Onboarding')),
             
@@ -171,26 +174,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   const SizedBox(height: 16),
-                  
-                  if (innovationData?.businessModel.isEmpty ?? true)
-                    _buildCompleteProfileButton(context)
-                  else 
-                    Card(
-                      elevation: 2,
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Center(
-                          child: Text(
-                            'Profile Complete',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.deepPurple,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                  _buildInnovationProfile(context),
+                 
                 ],
               ),
             ),
@@ -261,5 +246,100 @@ class _ProfilePageState extends State<ProfilePage> {
       case 5: return 'Master Innovator';
       default: return 'Innovator';
     }
+  }
+
+
+  Widget _buildInnovationProfile(BuildContext context) {
+    if (innovationData == null) {
+      return _buildCompleteProfileButton(context);
+    }
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+
+        const SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+          _buildCategoryIcon(Icons.business, 'Business Model', 
+            innovationData!.businessModel?.isNotEmpty ?? false),
+          _buildCategoryIcon(Icons.inventory, 'Product', 
+            innovationData!.productInnovation?.isNotEmpty ?? false),
+          _buildCategoryIcon(Icons.settings, 'Process', 
+            innovationData!.processInnovation?.isNotEmpty ?? false),
+          _buildCategoryIcon(Icons.people, 'Customer', 
+            innovationData!.customerExperience?.isNotEmpty ?? false),
+          _buildCategoryIcon(Icons.computer, 'Technology', 
+            innovationData!.technologyAdoption?.isNotEmpty ?? false),
+          ],
+        ),
+        ],
+      ),
+      ),
+    );
+    }
+    
+    Widget _buildCategoryIcon(IconData icon, String label, bool hasData) {
+    return GestureDetector(
+      onTap: hasData 
+        ? null 
+        : () {
+            String category;
+            switch (label) {
+              case 'Business Model':
+                category = 'businessModel';
+                break;
+              case 'Product':
+                category = 'productInnovation';
+                break;
+              case 'Process':
+                category = 'processInnovation';
+                break;
+              case 'Customer':
+                category = 'customerExperience';
+                break;
+              case 'Technology':
+                category = 'technologyAdoption';
+                break;
+              default:
+                category = '';
+            }
+            
+            if (category.isNotEmpty) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CategoryAssessmentPage(
+                    category: category,
+                    title: label,
+                    currentData: innovationData,
+                  ),
+                ),
+              ).then((_) => _loadUserData()); // Reload data when returning
+            }
+          },
+      child: Column(
+        children: [
+          Icon(
+            icon,
+            color: hasData ? Colors.deepPurple : Colors.grey,
+            size: 28,
+          ),
+          const SizedBox(height: 4),
+          // Text(
+          //   label,
+          //   style: TextStyle(
+          //   fontSize: 12,
+          //   color: hasData ? Colors.deepPurple : Colors.grey,
+          //   ),
+          // ),
+        ],
+      ),
+    );
   }
 }

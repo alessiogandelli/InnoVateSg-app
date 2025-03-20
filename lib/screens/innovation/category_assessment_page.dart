@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:innovate/models/innovation_data.dart';
+import 'package:innovate/services/api_service.dart';
 import 'package:innovate/services/storage_service.dart';
 import 'package:innovate/utils/innovation/questions_data.dart';
 
@@ -33,7 +36,7 @@ class _CategoryAssessmentPageState extends State<CategoryAssessmentPage> {
 
     // If we have existing data, prefill answers if available
     if (widget.currentData != null) {
-      List<String>? categoryAnswers;
+      List<Map<String, String>>? categoryAnswers;
       switch (widget.category) {
       case 'businessModel':
         categoryAnswers = widget.currentData!.businessModel;
@@ -55,37 +58,61 @@ class _CategoryAssessmentPageState extends State<CategoryAssessmentPage> {
       // Restore previous answers if they exist
       if (categoryAnswers != null && categoryAnswers.isNotEmpty) {
         for (int i = 0; i < answers.length && i < categoryAnswers.length; i++) {
-          if (categoryAnswers[i].isNotEmpty) {
-            answers[i] = int.parse(categoryAnswers[i]);
+          var answerEntry = categoryAnswers[i];
+          if (answerEntry.containsKey('answer') && answerEntry['answer']!.isNotEmpty) {
+            // Find index of the answer in options
+            String savedAnswer = answerEntry['answer']!;
+            List<String> options = questions[i]['options'];
+            for (int j = 0; j < options.length; j++) {
+              if (options[j] == savedAnswer) {
+                answers[i] = j + 1; // convert to 1-based index
+                break;
+              }
+            }
           }
         }
       }
     }
-    }
+  }
 
-    void answerQuestion(int answer) {
+  void answerQuestion(int answer) {
     setState(() {
       answers[currentQuestionIndex] = answer;
       if (currentQuestionIndex < questions.length - 1) {
-      currentQuestionIndex++;
+        currentQuestionIndex++;
       } else {
-      isCompleted = true;
+        isCompleted = true;
       }
     });
-    }
+  }
 
-    Future<void> saveAnswers() async {
+  Future<void> saveAnswers() async {
     // Get current innovation data or create new
     InnovationData data = widget.currentData ?? InnovationData.empty();
     
-    // Convert answers to list of strings
-    List<String> answerStrings = answers.map((a) => a.toString()).toList();
+    // Convert to map with question and answer
+    List<Map<String, String>> answerMaps = [];
+    for (int i = 0; i < answers.length; i++) {
+      if (answers[i] == -1) {
+        answerMaps.add({
+          'question': questions[i]['question'],
+          'answer': ""
+        });
+      } else {
+        // Get the selected option (subtracting 1 because our indices are 1-based)
+        List<String> options = questions[i]['options'];
+        answerMaps.add({
+          'question': questions[i]['question'],
+          'answer': options[answers[i] - 1]
+        });
+      }
+    }
     
     // Update the specific category with the result
     switch (widget.category) {
       case 'businessModel':
       data = InnovationData(
-        businessModel: answerStrings,
+        businessModel: answerMaps,
         productInnovation: data.productInnovation,
         processInnovation: data.processInnovation,
         customerExperience: data.customerExperience,
@@ -95,7 +122,7 @@ class _CategoryAssessmentPageState extends State<CategoryAssessmentPage> {
       case 'productInnovation':
       data = InnovationData(
         businessModel: data.businessModel,
-        productInnovation: answerStrings,
+        productInnovation: answerMaps,
         processInnovation: data.processInnovation,
         customerExperience: data.customerExperience,
         technologyAdoption: data.technologyAdoption,
@@ -105,7 +132,7 @@ class _CategoryAssessmentPageState extends State<CategoryAssessmentPage> {
       data = InnovationData(
         businessModel: data.businessModel,
         productInnovation: data.productInnovation,
-        processInnovation: answerStrings,
+        processInnovation: answerMaps,
         customerExperience: data.customerExperience,
         technologyAdoption: data.technologyAdoption,
       );
@@ -115,9 +142,10 @@ class _CategoryAssessmentPageState extends State<CategoryAssessmentPage> {
         businessModel: data.businessModel,
         productInnovation: data.productInnovation,
         processInnovation: data.processInnovation,
-        customerExperience: answerStrings,
+        customerExperience: answerMaps,
         technologyAdoption: data.technologyAdoption,
       );
+
       break;
       case 'technologyAdoption':
       data = InnovationData(
@@ -125,11 +153,12 @@ class _CategoryAssessmentPageState extends State<CategoryAssessmentPage> {
         productInnovation: data.productInnovation,
         processInnovation: data.processInnovation,
         customerExperience: data.customerExperience,
-        technologyAdoption: answerStrings,
+        technologyAdoption: answerMaps,
       );
       break;
     }
-    
+   // ApiService().postData(jsonEncode(answerMaps));
+
     // Save the updated innovation data
     await StorageService().saveInnovationData(data);
     
@@ -184,7 +213,6 @@ class _CategoryAssessmentPageState extends State<CategoryAssessmentPage> {
     return options.asMap().entries.map((entry) {
       final index = entry.key;
       final option = entry.value;
-      
       return Padding(
         padding: const EdgeInsets.only(bottom: 12.0),
         child: ElevatedButton(
@@ -197,7 +225,6 @@ class _CategoryAssessmentPageState extends State<CategoryAssessmentPage> {
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-            alignment: Alignment.centerLeft,
           ),
           child: Text(
             option,
@@ -210,6 +237,7 @@ class _CategoryAssessmentPageState extends State<CategoryAssessmentPage> {
   }
 
   Widget _buildCompletionScreen() {
+    print('Assessment completed! $answers');
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

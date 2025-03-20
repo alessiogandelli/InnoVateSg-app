@@ -87,7 +87,7 @@ class _QuestionsScreenState extends State<QuestionsScreen> {
       name: _name,
       role: _role,
       companyName: _companyName,
-      industries: _selectedIndustries,
+      industries: _selectedInterests,
       interests: _selectedInterests,
       innovationLevel: _innovationLevel,
       innovationAttitudes: attitudes,
