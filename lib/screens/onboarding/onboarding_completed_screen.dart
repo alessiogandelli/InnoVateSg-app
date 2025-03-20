@@ -67,14 +67,21 @@ class OnboardingCompletedScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildProfileItem('Role', userData.role),
+                        _buildProfileItem('Company', userData.companyName),
                         const Divider(),
                         _buildProfileItem('Experience', userData.innovationLevel),
                         const Divider(),
                         _buildProfileItem(
-                          'Interests', 
+                          'Industries', 
                           userData.interests.join(', ')
                         ),
+                        if (userData.innovationAttitudes.isNotEmpty) ...[
+                          const Divider(),
+                          _buildProfileItem(
+                            'Innovation Profile',
+                            _getInnovationProfileSummary(userData.innovationAttitudes),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -108,6 +115,22 @@ class OnboardingCompletedScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+  
+  String _getInnovationProfileSummary(List<String> attitudes) {
+    // Count the occurrences of each attitude
+    int cluelessCount = attitudes.where((a) => a == 'Clueless').length;
+    int motivatedCount = attitudes.where((a) => a == 'Motivated').length;
+    int hesitantCount = attitudes.where((a) => a == 'Hesitant').length;
+    
+    // Determine the dominant attitude
+    if (cluelessCount >= motivatedCount && cluelessCount >= hesitantCount) {
+      return 'Innovation Explorer';
+    } else if (motivatedCount >= cluelessCount && motivatedCount >= hesitantCount) {
+      return 'Innovation Champion';
+    } else {
+      return 'Innovation Pragmatist';
+    }
   }
   
   Widget _buildProfileItem(String label, String value) {

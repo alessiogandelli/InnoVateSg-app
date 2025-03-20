@@ -43,4 +43,15 @@ class StorageService {
       return null;
     }
   }
+
+  // delete onboarding data
+  Future<void> deleteOnboardingData() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/$_fileName');
+      await file.delete();
+    } catch (e) {
+      print('Error deleting onboarding data: $e');
+    }
+  }
 }

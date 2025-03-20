@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:innovate/services/storage_service.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -79,6 +80,7 @@ class ProfilePage extends StatelessWidget {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 16),
+            ElevatedButton(onPressed: StorageService().deleteOnboardingData, child: Text('reset onbaording')),
             // Company information
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
