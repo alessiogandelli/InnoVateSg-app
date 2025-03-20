@@ -13,7 +13,7 @@ class QuestionsScreen extends StatefulWidget {
 class _QuestionsScreenState extends State<QuestionsScreen> {
   final _pageController = PageController();
   int _currentPage = 0;
-  final int _totalPages = 7; // Updated to include new questions
+  final int _totalPages = 6; // Updated to match the actual number of pages
   
   String _name = '';
   String _role = '';
@@ -32,9 +32,7 @@ class _QuestionsScreenState extends State<QuestionsScreen> {
     'Transportation', 'Energy', 'Agriculture', 'Construction', 
   ];
   
-  final List<String> _innovationLevels = [
-    'Beginner', 'Intermediate', 'Advanced', 'Expert'
-  ];
+
   
   // Map for storing attitude question options and their corresponding categories
   final Map<String, Map<String, String>> _attitudeQuestions = {
@@ -136,7 +134,7 @@ class _QuestionsScreenState extends State<QuestionsScreen> {
                     _buildNameQuestion(),
                     _buildCompanyNameQuestion(),
                     _buildInterestsQuestion(),
-                    _buildInnovationLevelQuestion(),
+                   // _buildInnovationLevelQuestion(),
                     // New attitude questions
                     _buildInnovationApproachQuestion(),
                     _buildDecisionMakingStyleQuestion(),
@@ -189,10 +187,10 @@ class _QuestionsScreenState extends State<QuestionsScreen> {
       case 0: return _name.isNotEmpty;
       case 1: return _companyName.isNotEmpty;
       case 2: return _selectedInterests.isNotEmpty;
-      case 3: return _innovationLevel.isNotEmpty;
-      case 4: return _innovationApproach != null;
-      case 5: return _decisionMakingStyle != null;
-      case 6: return _riskPerspective != null;
+      //case 3: return _innovationLevel.isNotEmpty;
+      case 3: return _innovationApproach != null;
+      case 4: return _decisionMakingStyle != null;
+      case 5: return _riskPerspective != null;
       default: return false;
     }
   }
@@ -411,94 +409,94 @@ class _QuestionsScreenState extends State<QuestionsScreen> {
     );
   }
   
-  Widget _buildInnovationLevelQuestion() {
-    return Padding(
-      padding: const EdgeInsets.all(24.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "What's your innovation experience level?",
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            "This helps us tailor content to your needs",
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-          ),
-          const SizedBox(height: 24),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _innovationLevels.length,
-              itemBuilder: (context, index) {
-                final level = _innovationLevels[index];
-                final isSelected = _innovationLevel == level;
+  // Widget _buildInnovationLevelQuestion() {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(24.0),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         const Text(
+  //           "What's your innovation experience level?",
+  //           style: TextStyle(
+  //             fontSize: 24,
+  //             fontWeight: FontWeight.bold,
+  //           ),
+  //         ),
+  //         const SizedBox(height: 8),
+  //         const Text(
+  //           "This helps us tailor content to your needs",
+  //           style: TextStyle(
+  //             fontSize: 16,
+  //             color: Colors.grey,
+  //           ),
+  //         ),
+  //         const SizedBox(height: 24),
+  //         Expanded(
+  //           child: ListView.builder(
+  //             itemCount: _innovationLevels.length,
+  //             itemBuilder: (context, index) {
+  //               final level = _innovationLevels[index];
+  //               final isSelected = _innovationLevel == level;
                 
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: InkWell(
-                    onTap: () {
-                      setState(() {
-                        _innovationLevel = level;
-                      });
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: isSelected 
-                            ? Theme.of(context).colorScheme.primary.withOpacity(0.1) 
-                            : Colors.white,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: isSelected
-                              ? Theme.of(context).colorScheme.primary
-                              : Colors.grey.shade300,
-                          width: 2,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            isSelected 
-                                ? Icons.check_circle 
-                                : Icons.circle_outlined,
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.primary
-                                : Colors.grey,
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Text(
-                              level,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: isSelected 
-                                    ? FontWeight.bold 
-                                    : FontWeight.normal,
-                                color: isSelected
-                                    ? Theme.of(context).colorScheme.primary
-                                    : Colors.black87,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  //               return Padding(
+  //                 padding: const EdgeInsets.only(bottom: 12.0),
+  //                 child: InkWell(
+  //                   onTap: () {
+  //                     setState(() {
+  //                       _innovationLevel = level;
+  //                     });
+  //                   },
+  //                   child: Container(
+  //                     padding: const EdgeInsets.all(16),
+  //                     decoration: BoxDecoration(
+  //                       color: isSelected 
+  //                           ? Theme.of(context).colorScheme.primary.withOpacity(0.1) 
+  //                           : Colors.white,
+  //                       borderRadius: BorderRadius.circular(10),
+  //                       border: Border.all(
+  //                         color: isSelected
+  //                             ? Theme.of(context).colorScheme.primary
+  //                             : Colors.grey.shade300,
+  //                         width: 2,
+  //                       ),
+  //                     ),
+  //                     child: Row(
+  //                       children: [
+  //                         Icon(
+  //                           isSelected 
+  //                               ? Icons.check_circle 
+  //                               : Icons.circle_outlined,
+  //                           color: isSelected
+  //                               ? Theme.of(context).colorScheme.primary
+  //                               : Colors.grey,
+  //                         ),
+  //                         const SizedBox(width: 16),
+  //                         Expanded(
+  //                           child: Text(
+  //                             level,
+  //                             style: TextStyle(
+  //                               fontSize: 18,
+  //                               fontWeight: isSelected 
+  //                                   ? FontWeight.bold 
+  //                                   : FontWeight.normal,
+  //                               color: isSelected
+  //                                   ? Theme.of(context).colorScheme.primary
+  //                                   : Colors.black87,
+  //                             ),
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                   ),
+  //                 ),
+  //               );
+  //             },
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
   
   // New question builders for innovation attitudes
   Widget _buildInnovationApproachQuestion() {

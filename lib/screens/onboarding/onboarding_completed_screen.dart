@@ -69,8 +69,7 @@ class OnboardingCompletedScreen extends StatelessWidget {
                       children: [
                         _buildProfileItem('Company', userData.companyName),
                         const Divider(),
-                        _buildProfileItem('Experience', userData.innovationLevel),
-                        const Divider(),
+      
                         _buildProfileItem(
                           'Industries', 
                           userData.interests.join(', ')
