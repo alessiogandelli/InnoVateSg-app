@@ -10,6 +10,7 @@ class ProfilePage extends StatelessWidget {
     const int currentLevel = 3;
     const int maxLevel = 5;
     final double progressValue = currentLevel / maxLevel;
+   // final StorageService storageService = StorageService().getOnboardingData();
     
     return SingleChildScrollView(
       child: Center(
