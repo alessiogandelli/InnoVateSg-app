@@ -1,0 +1,64 @@
+import 'package:flutter/material.dart';
+import 'package:innovate/models/onboarding_data.dart';
+import 'package:innovate/services/storage_service.dart';
+import 'package:innovate/screens/onboarding/welcome_screen.dart';
+import 'package:innovate/screens/onboarding/questions_screen.dart';
+import 'package:innovate/screens/onboarding/onboarding_completed_screen.dart';
+
+class OnboardingFlow extends StatefulWidget {
+  final VoidCallback onComplete;
+  
+  const OnboardingFlow({super.key, required this.onComplete});
+
+  @override
+  State<OnboardingFlow> createState() => _OnboardingFlowState();
+}
+
+class _OnboardingFlowState extends State<OnboardingFlow> {
+  final _storageService = StorageService();
+  int _currentStep = 0;
+  late OnboardingData _userData;
+  
+  @override
+  void initState() {
+    super.initState();
+    _userData = OnboardingData.empty();
+  }
+  
+  void _moveToQuestions() {
+    setState(() {
+      _currentStep = 1;
+    });
+  }
+  
+  void _saveUserData(OnboardingData data) async {
+    setState(() {
+      _userData = data;
+      _currentStep = 2;
+    });
+    
+    // Save to storage
+    await _storageService.saveOnboardingData(data);
+  }
+  
+  void _completeOnboarding() {
+    widget.onComplete();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    switch (_currentStep) {
+      case 0:
+        return WelcomeScreen(onGetStarted: _moveToQuestions);
+      case 1:
+        return QuestionsScreen(onComplete: _saveUserData);
+      case 2:
+        return OnboardingCompletedScreen(
+          userData: _userData,
+          onGetStarted: _completeOnboarding,
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+}
