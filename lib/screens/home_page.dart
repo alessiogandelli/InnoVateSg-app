@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:innovate/screens/onboarding/onboarding_flow.dart';
+import 'package:innovate/services/storage_service.dart';
 import 'chat_page.dart';
 import 'explore_page.dart';
 import 'profile_page.dart';
@@ -6,6 +8,7 @@ import 'profile_page.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
   final String title;
+   
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -48,6 +51,10 @@ class _HomePageState extends State<HomePage> {
             icon: const Icon(Icons.lightbulb_outline),
             onPressed: () {
               // Innovation tips feature
+              StorageService().deleteInnovationData();
+              StorageService().deleteOnboardingData();
+              //start the onboarding process
+               
             },
           ),
         ],

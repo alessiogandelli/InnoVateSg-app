@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_ai_toolkit/flutter_ai_toolkit.dart';
 
@@ -37,9 +35,14 @@ class StregattoProvider extends LlmProvider with ChangeNotifier {
         Uri.parse(apiEndpoint+'message'),
         headers: {
           'Content-Type': 'application/json',
-          
+          'Authorization': apiKey.isNotEmpty ? 'Bearer $apiKey' : '',
         },
         body: jsonEncode(payload),
+      ).timeout(
+        const Duration(seconds: 30),
+        onTimeout: () {
+          throw Exception('Request timed out. Please check your connection and try again.');
+        },
       );
       
       if (response.statusCode != 200) {
@@ -53,7 +56,13 @@ class StregattoProvider extends LlmProvider with ChangeNotifier {
       // Return the response as a stream
       yield responseText;
     } catch (e) {
-      yield "Error communicating with AI agent: $e";
+      if (e is http.ClientException || e.toString().contains('SocketException')) {
+        yield "Error connecting to AI service. Please check your network connection and API settings.";
+      } else if (e is FormatException) {
+        yield "Error parsing AI response. Please try again later.";
+      } else {
+        yield "Error communicating with AI agent: $e";
+      }
     }
   }
   
