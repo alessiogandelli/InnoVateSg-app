@@ -41,12 +41,12 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Innovation Coach',
+      title: '',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF2E8B57), // Sea Green
-          primary: const Color(0xFF2E8B57),
-          secondary: const Color(0xFF66BB6A),
+          primary: const Color(0xFF009639),
+          secondary: const Color(0xFF009639),
           tertiary: const Color(0xFFA5D6A7),
           background: Colors.white,
         ),
@@ -64,7 +64,7 @@ class _MyAppState extends State<MyApp> {
       home: _onboardingComplete == null
           ? const Center(child: CircularProgressIndicator())
           : _onboardingComplete!
-              ? const HomePage(title: 'Innovation Coach')
+              ? const HomePage(title: '')
               : OnboardingFlow(onComplete: _setOnboardingComplete),
     );
   }

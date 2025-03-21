@@ -25,14 +25,15 @@ class WelcomeScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.psychology,
-                  size: 80,
-                  color: Colors.white,
+                Image.asset(
+                  'assets/IVSG_logo_white.png',
+                  height: 120,
+                  width: 120,
+                  fit: BoxFit.contain,
                 ),
                 const SizedBox(height: 32),
                 const Text(
-                  'Welcome to Innovation Coach',
+                  'Welcome to InnoVateSG',
                   style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,

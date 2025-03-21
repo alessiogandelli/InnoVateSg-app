@@ -186,14 +186,18 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       Row(
                         children: [
-                          Text(
-                            _getLevelTitle(currentLevel),
-                            style: const TextStyle(
+                            Flexible(
+                            child: Text(
+                              _getLevelTitle(currentLevel),
+                              style: const TextStyle(
                               color: Colors.deepPurple,
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
                             ),
-                          ),
+                            ),
                           const SizedBox(width: 8),
                           CircleAvatar(
                             radius: 12,
@@ -318,11 +322,11 @@ Widget _buildRadarChart(int selectedIndex) {
   
   // Create a single dataset with all points
   List<RadarEntry> entries = [
-    RadarEntry(value: categoryPoints['businessModel']!.toDouble() / maxValue),
-    RadarEntry(value: categoryPoints['productInnovation']!.toDouble() / maxValue),
-    RadarEntry(value: categoryPoints['processInnovation']!.toDouble() / maxValue),
-    RadarEntry(value: categoryPoints['customerExperience']!.toDouble() / maxValue),
-    RadarEntry(value: categoryPoints['technologyAdoption']!.toDouble() / maxValue),
+    RadarEntry(value: categoryPoints['businessModel']!.toDouble() / maxValue +1),
+    RadarEntry(value: categoryPoints['productInnovation']!.toDouble() / maxValue+1),
+    RadarEntry(value: categoryPoints['processInnovation']!.toDouble() / maxValue+1),
+    RadarEntry(value: categoryPoints['customerExperience']!.toDouble() / maxValue+1),
+    RadarEntry(value: categoryPoints['technologyAdoption']!.toDouble() / maxValue+1),
   ];
   
   // Define colors for each section
@@ -392,9 +396,9 @@ Widget _buildRadarChart(int selectedIndex) {
             tabs: [
               Tab(icon: Icon(Icons.business), text: 'Business'),
               Tab(icon: Icon(Icons.inventory), text: 'Product'),
+              Tab(icon: Icon(Icons.eco), text: 'Sustainability'),
               Tab(icon: Icon(Icons.settings), text: 'Process'),
               Tab(icon: Icon(Icons.people), text: 'Customer'),
-              Tab(icon: Icon(Icons.computer), text: 'Technology'),
             ],
           ),
           Builder(

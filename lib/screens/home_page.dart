@@ -35,7 +35,11 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(Icons.psychology, color: Colors.white),
+            Image.asset(
+              'assets/IVSG_logo_white.png', 
+              height: 24, 
+              width: 24,
+            ),
             const SizedBox(width: 12),
             Text(
               widget.title,

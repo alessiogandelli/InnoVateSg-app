@@ -557,7 +557,7 @@ class _QuestionsScreenState extends State<QuestionsScreen> {
           Text(
             title,
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.bold,
             ),
           ),
