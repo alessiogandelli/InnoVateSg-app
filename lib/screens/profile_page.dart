@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:innovate/models/quesions.dart';
 import 'package:innovate/screens/innovation/innovation_profile.dart';
 import 'package:innovate/services/storage_service.dart';
 import 'package:innovate/models/onboarding_data.dart';
 import 'package:innovate/models/innovation_data.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:innovate/models/tasks.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -14,8 +16,17 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   OnboardingData? onboardingData;
-  InnovationData? innovationData;
+  List<AnsweredQuestion>? innovationData;
   bool isLoading = true;
+  
+  // Add a map to store tasks for each category
+  Map<TaskCategory, List<Task>?> categoryTasks = {
+    TaskCategory.businessModel: null,
+    TaskCategory.productService: null,
+    TaskCategory.processOperations: null,
+    TaskCategory.customerMarket: null,
+    TaskCategory.sustainability: null,
+  };
   
   // Value notifier for current tab index
   final ValueNotifier<int> selectedTabNotifier = ValueNotifier<int>(0);
@@ -42,6 +53,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     _loadUserData();
+    _loadCategoryTasks();
   }
 
   @override
@@ -50,10 +62,34 @@ class _ProfilePageState extends State<ProfilePage> {
     super.dispose();
   }
 
+  // Load tasks for each category
+  Future<void> _loadCategoryTasks() async {
+    final StorageService storageService = StorageService();
+    
+    // Load tasks for each category
+    try {
+      final businessModelTasks = await storageService.getTasks(TaskCategory.businessModel);
+      final productServiceTasks = await storageService.getTasks(TaskCategory.productService);
+      final processOperationsTasks = await storageService.getTasks(TaskCategory.processOperations);
+      final customerMarketTasks = await storageService.getTasks(TaskCategory.customerMarket);
+      final sustainabilityTasks = await storageService.getTasks(TaskCategory.sustainability);
+      
+      setState(() {
+        categoryTasks[TaskCategory.businessModel] = businessModelTasks;
+        categoryTasks[TaskCategory.productService] = productServiceTasks;
+        categoryTasks[TaskCategory.processOperations] = processOperationsTasks;
+        categoryTasks[TaskCategory.customerMarket] = customerMarketTasks;
+        categoryTasks[TaskCategory.sustainability] = sustainabilityTasks;
+      });
+    } catch (e) {
+      print('Error loading tasks: $e');
+    }
+  }
+
   Future<void> _loadUserData() async {
     final StorageService storageService = StorageService();
     final onboardingResult = await storageService.getOnboardingData();
-    final innovationResult = await storageService.getInnovationData();
+    final innovationResult = await storageService.getAnsweredQuestions();
     
     // Load task completion status
     final taskStatus = await storageService.getTaskCompletionStatus();
@@ -331,7 +367,7 @@ Widget _buildRadarChart(int selectedIndex) {
   }
 
   Widget _buildInnovationProfile(BuildContext context) {
-    if (innovationData == null) {
+    if (innovationData == null || innovationData!.isEmpty) {
       return _buildCompleteProfileButton(context);
     }
 
@@ -371,31 +407,31 @@ Widget _buildRadarChart(int selectedIndex) {
                     _buildCategoryContent(
                       context,
                       'Business Model',
-                      innovationData!.businessModel?.isNotEmpty ?? false,
+                      _hasCategoryData(TaskCategory.businessModel),
                       'businessModel',
                     ),
                     _buildCategoryContent(
                       context,
                       'Product',
-                      innovationData!.productInnovation?.isNotEmpty ?? false,
+                      _hasCategoryData(TaskCategory.productService),
                       'productInnovation',
                     ),
                     _buildCategoryContent(
                       context,
                       'Process',
-                      innovationData!.processInnovation?.isNotEmpty ?? false,
+                      _hasCategoryData(TaskCategory.processOperations),
                       'processInnovation',
                     ),
                     _buildCategoryContent(
                       context,
                       'Customer',
-                      innovationData!.customerExperience?.isNotEmpty ?? false,
+                      _hasCategoryData(TaskCategory.customerMarket),
                       'customerExperience',
                     ),
                     _buildCategoryContent(
                       context,
-                      'Technology',
-                      innovationData!.technologyAdoption?.isNotEmpty ?? false,
+                      'Sustainability',
+                      _hasCategoryData(TaskCategory.sustainability),
                       'technologyAdoption',
                     ),
                   ],
@@ -408,45 +444,38 @@ Widget _buildRadarChart(int selectedIndex) {
     );
   }
 
+  // Helper method to check if there is data for a specific category
+  bool _hasCategoryData(TaskCategory category) {
+    // Check if we have any related answers in innovationData
+    if (innovationData == null || innovationData!.isEmpty) {
+      return false;
+    }
+    
+    // If we have any tasks for this category, return true
+    if (categoryTasks[category] != null && categoryTasks[category]!.isNotEmpty) {
+      return true;
+    }
+    
+    // Default to true if we have any innovation data
+    return innovationData!.isNotEmpty;
+  }
+
   Widget _buildCategoryContent(
     BuildContext context,
     String label,
     bool hasData,
     String category,
   ) {
-    // Define actionable tasks for each innovation category
-    Map<String, List<String>> innovationTasks = {
-      'businessModel': [
-        'Map your current revenue streams',
-        'Identify one new customer segment',
-        'Test a subscription-based model',
-        'Create a simplified value proposition'
-      ],
-      'productInnovation': [
-        'List 3 unmet customer needs',
-        'Prototype a product improvement',
-        'Run a 1-week feature experiment',
-        'Collect feedback on a new idea'
-      ],
-      'processInnovation': [
-        'Map one inefficient workflow',
-        'Automate one repetitive task',
-        'Test a faster delivery method',
-        'Reduce steps in customer journey'
-      ],
-      'customerExperience': [
-        'Talk to 5 customers directly',
-        'Create a customer journey map',
-        'Implement one UX improvement',
-        'Measure satisfaction on one touchpoint'
-      ],
-      'technologyAdoption': [
-        'Evaluate one new technology',
-        'Run a small AI experiment',
-        'Test a new digital tool',
-        'Integrate systems to save time'
-      ],
-    };
+    final TaskCategory categoryEnum = _getCategoryEnum(category);
+    final List<Task>? tasks = categoryTasks[categoryEnum];
+    
+    // Get answered questions related to this category if available
+    List<AnsweredQuestion> categoryAnswers = [];
+    if (innovationData != null && innovationData!.isNotEmpty) {
+      // In a real app, you might want to filter answers by category
+      // For now, we'll use all answers for each category
+      categoryAnswers = innovationData!;
+    }
 
     return Padding(
       padding: const EdgeInsets.all(12.0),
@@ -458,7 +487,7 @@ Widget _buildRadarChart(int selectedIndex) {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '$label',
+                      label,
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.deepPurple),
                     ),
                     Container(
@@ -475,59 +504,95 @@ Widget _buildRadarChart(int selectedIndex) {
                   ],
                 ),
                 const SizedBox(height: 8),
+                // Show answers summary if available
+                if (categoryAnswers.isNotEmpty)
+            
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: innovationTasks[category]?.length ?? 0,
-                    itemBuilder: (context, index) {
-                      final bool isCompleted = taskCompletionStatus[category]![index];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        child: CheckboxListTile(
-                          dense: true,
-                          value: isCompleted,
-                          activeColor: Colors.deepPurple,
-                          title: Text(
-                            innovationTasks[category]![index],
-                            style: TextStyle(
-                              decoration: isCompleted ? TextDecoration.lineThrough : null,
-                              color: isCompleted ? Colors.grey : Colors.black,
+                  child: tasks == null
+                      ? const Center(child: CircularProgressIndicator())
+                      : tasks.isEmpty
+                          ? Center(child: Text('No tasks available for $label'))
+                          : ListView.builder(
+                              itemCount: tasks.length,
+                              itemBuilder: (context, index) {
+                                final task = tasks[index];
+                                // Use existing completion status if available, or create new ones
+                                if (taskCompletionStatus[category]!.length <= index) {
+                                  taskCompletionStatus[category]!.add(false);
+                                }
+                                final bool isCompleted = taskCompletionStatus[category]![index];
+                                
+                                return Card(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  child: CheckboxListTile(
+                                    dense: true,
+                                    value: isCompleted,
+                                    activeColor: Colors.deepPurple,
+                                    title: Text(
+                                      task.title,
+                                      style: TextStyle(
+                                        decoration: isCompleted ? TextDecoration.lineThrough : null,
+                                        color: isCompleted ? Colors.grey : Colors.black,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      task.description,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: isCompleted ? Colors.grey : Colors.black54,
+                                      ),
+                                    ),
+                                    secondary: const Text(
+                                      '+5 pts',
+                                      style: TextStyle(
+                                        color: Colors.deepPurple,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    onChanged: (bool? value) {
+                                      _toggleTaskCompletion(category, index);
+                                    },
+                                  ),
+                                );
+                              },
                             ),
-                          ),
-                          secondary: const Text(
-                            '+5 pts',
-                            style: TextStyle(
-                              color: Colors.deepPurple,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          onChanged: (bool? value) {
-                            _toggleTaskCompletion(category, index);
-                          },
-                        ),
-                      );
-                    },
-                  ),
                 ),
               ],
             )
           : Center(
               child: ElevatedButton(
                 onPressed: () {
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => CategoryAssessmentPage(
-                  //       category: category,
-                  //       title: label,
-                  //       currentData: innovationData,
-                  //     ),
-                  //   ),
-                  // ).then((_) => _loadUserData()); // Reload data when returning
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const InnovationProfile(),
+                    ),
+                  ).then((_) => _loadUserData());
                 },
                 child: Text('Add $label Data'),
               ),
             ),
     );
+  }
+
+  // Map category string to TaskCategory enum
+  TaskCategory _getCategoryEnum(String category) {
+    switch (category) {
+      case 'businessModel':
+        return TaskCategory.businessModel;
+      case 'productInnovation':
+        return TaskCategory.productService;
+      case 'processInnovation':
+        return TaskCategory.processOperations;
+      case 'customerExperience':
+        return TaskCategory.customerMarket;
+      case 'technologyAdoption':
+        return TaskCategory.sustainability;
+      default:
+        return TaskCategory.businessModel;
+    }
   }
 
   Widget _buildCompleteProfileButton(BuildContext context) {

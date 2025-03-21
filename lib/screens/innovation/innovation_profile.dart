@@ -15,7 +15,7 @@ class _InnovationProfileState extends State<InnovationProfile> {
   int _currentQuestionIndex = 0;
   final Map<int, String> _answers = {};
   bool _isLoading = true;
-  final List<Map<String, String>> _savedResponses = [];
+  final List<AnsweredQuestion> _savedResponses = [];
 
   @override
   void initState() {
@@ -49,10 +49,10 @@ class _InnovationProfileState extends State<InnovationProfile> {
       _answers[_currentQuestionIndex] = answer;
       
       // Save the question-answer pair
-      _savedResponses.add({
-        'question': _questions![_currentQuestionIndex].question,
-        'answer': answer
-      });
+      _savedResponses.add(AnsweredQuestion(
+        question: _questions![_currentQuestionIndex].question,
+        answer: answer
+      ));
       
       if (_currentQuestionIndex < (_questions?.length ?? 0) - 1) {
         _currentQuestionIndex++;
@@ -66,15 +66,12 @@ class _InnovationProfileState extends State<InnovationProfile> {
   void _handleCompletion() {
     // Here you can use _savedResponses which contains all question-answer pairs
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('All questions answered! Processing your innovation profile...'),
-        backgroundColor: Colors.green,
-      ),
-    );
+
     
     // Example: Print to console
     print('Saved responses: $_savedResponses');
+    Navigator.of(context).pop();
+    StorageService().saveAnsweredQuestions(_savedResponses);
     
     // Example: Navigate to results page with the responses
     // Navigator.of(context).pushReplacement(

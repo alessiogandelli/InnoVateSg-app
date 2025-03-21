@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:innovate/models/quesions.dart';
+import 'package:innovate/models/tasks.dart';
 import 'package:innovate/services/api_service.dart';
 import 'package:innovate/services/llm_service.dart';
 import 'package:innovate/services/stregatto.dart';
@@ -14,6 +15,8 @@ class StorageService {
   static const String _innovationFileName = 'innovation_data.json';
   static const String _questions = 'questions.json';
   static const String _answeredQuestions = 'answered_questions.json';
+  static const String _tasks = 'tasks.json';
+
   
   // API endpoint configuration - replace with your actual endpoint
   // static const String stregattoApiEndpoint = 'https://ai-service-url/';
@@ -231,11 +234,42 @@ class StorageService {
       final file = await _getFile(_answeredQuestions);
       await file.writeAsString(jsonEncode(questions.map((q) => q.toJson()).toList()));
       print('Answered questions saved $questions');
-      OpenAIService().getTrack(questions);
+      final List<Task> tasksBusiness = await OpenAIService().getTasks(questions, 'business');
+      print('Tasks generated: $tasksBusiness');
+      saveTasks(tasksBusiness, TaskCategory.businessModel);
     } catch (e) {
       print('Error saving answered questions: $e');
     }
   }
+
+  // Save tasks
+  Future<void> saveTasks(List<Task> tasks, TaskCategory category) async {
+    try {
+      final file = await _getFile(category.name+'_'+_tasks);
+      await file.writeAsString(jsonEncode(tasks.map((t) => t.toJson()).toList()));
+      print('Tasks saved $tasks');
+    } catch (e) {
+      print('Error saving tasks: $e');
+    }
+  }
+
+  // Get tasks
+  Future<List<Task>> getTasks(TaskCategory category) async {
+    try {
+      final file = await _getFile(category.name+'_'+_tasks);
+      
+      if (await file.exists()) {
+        final data = await file.readAsString();
+        final List<dynamic> jsonList = jsonDecode(data);
+        return jsonList.map((json) => Task.fromJson(json)).toList();
+      }
+      return [];
+    } catch (e) {
+      print('Error reading tasks: $e');
+      return [];
+    }
+  }
+
 
 
 }

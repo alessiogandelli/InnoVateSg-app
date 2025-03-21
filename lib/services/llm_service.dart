@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:innovate/models/onboarding_data.dart';
 import 'package:innovate/models/quesions.dart';
+import 'package:innovate/models/tasks.dart';
 
 class OpenAIService {
   final String apiKey = const String.fromEnvironment(
@@ -82,5 +83,25 @@ each question should have 4 possible answers to choose from, the answers should 
     } else {
       throw Exception('Failed to generate response: ${response.body}');
     }
+  }
+
+  Future<List<Task>> getTasks(List<AnsweredQuestion> answeredQuestion, String category) async {
+    return [
+      Task(
+        id: '1', 
+        title: 'title', 
+        description: 'description', 
+        potentialInnovations: [
+          Innovation(
+            id: '1',
+            title: 'Innovation title',
+            description: 'Innovation description',
+            impactLevel: 'High',
+            effortRequired: 'Low',
+            benefits: ['Benefit 1', 'Benefit 2']
+          )
+        ]
+      )
+    ];
   }
 }
