@@ -651,9 +651,7 @@ class LoadingTasks extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
-          ),
+
           const SizedBox(height: 16),
           Text(
             'Preparing your innovation tasks...',

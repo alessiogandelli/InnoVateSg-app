@@ -3,7 +3,7 @@ import 'package:innovate/models/onboarding_data.dart';
 import 'package:innovate/services/storage_service.dart';
 import 'package:innovate/screens/onboarding/welcome_screen.dart';
 import 'package:innovate/screens/onboarding/info_screen_one.dart';
-import 'package:innovate/screens/onboarding/info_screen_two.dart';
+// Remove info_screen_two import
 import 'package:innovate/screens/onboarding/questions_screen.dart';
 import 'package:innovate/screens/onboarding/onboarding_completed_screen.dart';
 
@@ -36,7 +36,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   void _saveUserData(OnboardingData data) async {
     setState(() {
       _userData = data;
-      _currentStep = 4;
+      _currentStep = 3; // Updated from 4 to 3 since we removed a step
     });
     
     // Save to storage
@@ -55,10 +55,8 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
       case 1:
         return InfoScreenOne(onNext: _moveToNextScreen);
       case 2:
-        return InfoScreenTwo(onNext: _moveToNextScreen);
-      case 3:
         return QuestionsScreen(onComplete: _saveUserData);
-      case 4:
+      case 3:
         return OnboardingCompletedScreen(
           userData: _userData,
           onGetStarted: _completeOnboarding,
