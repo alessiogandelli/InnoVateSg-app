@@ -6,6 +6,7 @@ import 'package:innovate/models/onboarding_data.dart';
 import 'package:innovate/models/innovation_data.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:innovate/models/tasks.dart';
+import 'dart:async'; // Add this import for Timer
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -18,6 +19,7 @@ class _ProfilePageState extends State<ProfilePage> {
   OnboardingData? onboardingData;
   List<AnsweredQuestion>? innovationData;
   bool isLoading = true;
+  Timer? _taskRefreshTimer; // Add timer field
   
   // Add a map to store tasks for each category
   Map<TaskCategory, List<Task>?> categoryTasks = {
@@ -54,11 +56,17 @@ class _ProfilePageState extends State<ProfilePage> {
     super.initState();
     _loadUserData();
     _loadCategoryTasks();
+    
+    // Set up timer to refresh tasks every 2 seconds
+    _taskRefreshTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
+      _loadCategoryTasks();
+    });
   }
 
   @override
   void dispose() {
     selectedTabNotifier.dispose();
+    _taskRefreshTimer?.cancel(); // Cancel the timer when widget is disposed
     super.dispose();
   }
 
@@ -144,7 +152,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: LoadingTasks());
     }
 
     const int maxLevel = 5;
@@ -508,10 +516,10 @@ Widget _buildRadarChart(int selectedIndex) {
                 if (categoryAnswers.isNotEmpty)
             
                 Expanded(
-                  child: tasks == null
+                  child: tasks!.isEmpty
                       ? const Center(child: CircularProgressIndicator())
-                      : tasks.isEmpty
-                          ? Center(child: Text('No tasks available for $label'))
+                     
+                        
                           : ListView.builder(
                               itemCount: tasks.length,
                               itemBuilder: (context, index) {
@@ -628,6 +636,33 @@ Widget _buildRadarChart(int selectedIndex) {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+
+class LoadingTasks extends StatelessWidget {
+  const LoadingTasks({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.deepPurple),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Preparing your innovation tasks...',
+            style: TextStyle(
+              color: Colors.grey[700],
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

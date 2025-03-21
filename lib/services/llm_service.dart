@@ -58,6 +58,7 @@ each question should have 4 possible answers to choose from, the answers should 
     if (response.statusCode == 200) {
            
       final data = jsonDecode(response.body);
+     
       final jsonString = data['choices'][0]['message']['content'];
       
       // Parse the content as either a Map or a List based on what's returned
@@ -86,22 +87,101 @@ each question should have 4 possible answers to choose from, the answers should 
   }
 
   Future<List<Task>> getTasks(List<AnsweredQuestion> answeredQuestion, String category) async {
-    return [
-      Task(
-        id: '1', 
-        title: 'title', 
-        description: 'description', 
-        potentialInnovations: [
-          Innovation(
-            id: '1',
-            title: 'Innovation title',
-            description: 'Innovation description',
-            impactLevel: 'High',
-            effortRequired: 'Low',
-            benefits: ['Benefit 1', 'Benefit 2']
-          )
-        ]
-      )
-    ];
+
+    final String promptTasks = """
+Generate a JSON array of general innovation tasks that a user can complete in the given category based on the answered question. Each task should have an `id`, `title`, `description`, and a list of `potentialInnovations`. Each innovation should represent an atomic action that helps the user get closer to the goal and should have an `id`, `title`, `description`, `impactLevel` (High, Medium, or Low), `effortRequired` (High, Medium, or Low), and a list of benefits.
+
+Answered Question: {answered question}  
+Category: {category}
+
+Ensure the JSON is properly formatted and structured as follows:
+
+[
+  {
+    "id": "1",
+    "title": "Task Title",
+    "description": "Task Description",
+    "potentialInnovations": [
+      {
+        "id": "1",
+        "title": "Innovation Title",
+        "description": "Innovation Description",
+        "impactLevel": "High",
+        "effortRequired": "Low",
+        "benefits": ["Benefit 1", "Benefit 2"]
+      }
+    ]
+  }
+]
+
+Generate at least 3 unique tasks that fit the category and align with the answered question.
+
+""";
+
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/chat/completions'),
+      headers: {
+      'Authorization': 'Bearer $apiKey',
+      'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+      'model': 'gpt-4o-mini-2024-07-18',
+      'messages': [
+        {'role': 'user', 'content': promptTasks}
+      ],
+      'response_format': {'type': 'json_object'},
+      'temperature': 0.7,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+           
+      final data = jsonDecode(response.body);
+      print('data for $category tasks: $data');
+      final jsonString = data['choices'][0]['message']['content'];
+      
+      // Parse the content as either a Map or a List based on what's returned
+      final dynamic parsedJson = jsonDecode(jsonString);
+      List<dynamic> jsonList;
+      
+      if (parsedJson is Map) {
+        // If response is a Map with a key that contains the list, extract it
+        // Assume the map has a field like 'questions' or similar
+        // Check for a list field or convert the single item to a list
+        jsonList = parsedJson.containsKey('tasks') 
+            ? List<dynamic>.from(parsedJson['tasks'])
+            : [parsedJson];
+      } else if (parsedJson is List) {
+        // If response is already a List
+        jsonList = parsedJson;
+      } else {
+        throw Exception('Unexpected response format: $jsonString');
+      }
+      
+      return jsonList.map((json) => Task.fromJson(json)).toList();
+      
+    } else {
+      throw Exception('Failed to generate response: ${response.body}');
+    }
+
+      
+    // return [
+    //   Task(
+    //     id: '1', 
+    //     title: 'title', 
+    //     description: 'description', 
+    //     potentialInnovations: [
+    //       Innovation(
+    //         id: '1',
+    //         title: 'Innovation title',
+    //         description: 'Innovation description',
+    //         impactLevel: 'High',
+    //         effortRequired: 'Low',
+    //         benefits: ['Benefit 1', 'Benefit 2']
+    //       )
+    //     ]
+    //   )
+    // ];
   }
 }

@@ -98,10 +98,40 @@ class StorageService {
   // delete onboarding data
   Future<void> deleteOnboardingData() async {
     try {
-      final file = await _getFile(_fileName);
-      if (await file.exists()) {
-        await file.delete();
+      // Delete the onboarding data file
+      final onboardingFile = await _getFile(_fileName);
+      if (await onboardingFile.exists()) {
+        await onboardingFile.delete();
       }
+      
+      // Delete innovation data file
+      final innovationFile = await _getFile(_innovationFileName);
+      if (await innovationFile.exists()) {
+        await innovationFile.delete();
+      }
+      
+      // Delete questions file
+      final questionsFile = await _getFile(_questions);
+      if (await questionsFile.exists()) {
+        await questionsFile.delete();
+      }
+      
+      // Delete answered questions file
+      final answeredQuestionsFile = await _getFile(_answeredQuestions);
+      if (await answeredQuestionsFile.exists()) {
+        await answeredQuestionsFile.delete();
+      }
+      
+      // Delete all task files for each category
+      for (var category in TaskCategory.values) {
+        final taskFile = await _getFile(category.name + '_' + _tasks);
+        if (await taskFile.exists()) {
+          await taskFile.delete();
+        }
+      }
+      
+      // Clear task completion status from SharedPreferences
+      await deleteTaskCompletionStatus();
     } catch (e) {
       print('Error deleting onboarding data: $e');
     }
