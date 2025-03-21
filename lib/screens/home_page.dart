@@ -53,6 +53,7 @@ class _HomePageState extends State<HomePage> {
               // Innovation tips feature
               StorageService().deleteInnovationData();
               StorageService().deleteOnboardingData();
+              StorageService().deleteTaskCompletionStatus();
               //start the onboarding process
                
             },

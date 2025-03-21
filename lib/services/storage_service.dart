@@ -234,9 +234,34 @@ class StorageService {
       final file = await _getFile(_answeredQuestions);
       await file.writeAsString(jsonEncode(questions.map((q) => q.toJson()).toList()));
       print('Answered questions saved $questions');
+      // Generate tasks for all categories
+      // Generate and save tasks for each category sequentially
+      // Business tasks
       final List<Task> tasksBusiness = await OpenAIService().getTasks(questions, 'business');
-      print('Tasks generated: $tasksBusiness');
-      saveTasks(tasksBusiness, TaskCategory.businessModel);
+      await saveTasks(tasksBusiness, TaskCategory.businessModel);
+      print('Business tasks generated and saved ');
+      
+      // Process tasks
+      final List<Task> tasksProcess = await OpenAIService().getTasks(questions, 'process');
+      await saveTasks(tasksProcess, TaskCategory.processOperations);
+      print('Process tasks generated and saved');
+      
+      // Product tasks
+      final List<Task> tasksProduct = await OpenAIService().getTasks(questions, 'product');
+      await saveTasks(tasksProduct, TaskCategory.productService);
+      print('Product tasks generated and saved');
+      
+      // Marketing tasks
+      final List<Task> tasksMarketing = await OpenAIService().getTasks(questions, 'marketing');
+      await saveTasks(tasksMarketing, TaskCategory.customerMarket);
+      print('Marketing tasks generated and saved');
+      
+      // Sustainability tasks
+      final List<Task> tasksSustainability = await OpenAIService().getTasks(questions, 'sustainability');
+      await saveTasks(tasksSustainability, TaskCategory.sustainability);
+      print('Sustainability tasks generated and saved');
+      
+
     } catch (e) {
       print('Error saving answered questions: $e');
     }
@@ -247,7 +272,7 @@ class StorageService {
     try {
       final file = await _getFile(category.name+'_'+_tasks);
       await file.writeAsString(jsonEncode(tasks.map((t) => t.toJson()).toList()));
-      print('Tasks saved $tasks');
+      print('Tasks saved $tasks, file: $file');
     } catch (e) {
       print('Error saving tasks: $e');
     }

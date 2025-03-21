@@ -51,6 +51,11 @@ class Task {
       'potentialInnovations': potentialInnovations.map((innovation) => innovation.toJson()).toList(),
     };
   }
+
+  @override
+  String toString() {
+    return 'Task{id: $id, title: $title, description: $description, potentialInnovations: $potentialInnovations}';
+  }
 }
 
 /// Represents an innovation that can be applied to a task.
